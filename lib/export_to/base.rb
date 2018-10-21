@@ -57,8 +57,9 @@ module ExportTo
       yield(self.class.head_titles, nil, i)
 
       join_relation = self.class.join_relation
-      records.each do |record|
-        run_records = if join_relation && record.send(join_relation).nil? == false
+
+      self.records.each do |record|
+        run_records = if join_relation.present? && record.send(join_relation).present?
           record.send(join_relation)
         else
           [ record ]

@@ -30,7 +30,7 @@ describe "ExportUser" do
 
   before do
     @users = [
-      User.new('Eddie', 'Li', '+886977777777', 'Kaohsiung city'),
+      User.new('Eddie', 'Li', '+886977777777', 'Kaohsiung city', []),
       User.new('Vegeta', 'Lu', '+886938234134', 'Taipei city', [ Wallet.new(1000), Wallet.new(2000) ])
     ]
     @export = ExportUser.new(@users)

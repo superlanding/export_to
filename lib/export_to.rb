@@ -1,4 +1,6 @@
-require 'active_support/core_ext/class/attribute'
+require 'active_support/core_ext/object'
+require 'active_support/core_ext/class'
+require 'active_support'
 require 'write_xlsx'
 require 'roo'
 require 'csv'
