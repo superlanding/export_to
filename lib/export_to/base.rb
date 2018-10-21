@@ -4,6 +4,7 @@ module ExportTo
     class_attribute :body_keys
     class_attribute :presenter_klass
     class_attribute :join_relation
+    class_attribute :each_proc
 
     # 預設 presenter
     self.presenter_klass = Presenter
@@ -73,12 +74,18 @@ module ExportTo
           else
             self.class.presenter_klass.new(run_record)
           end
+
+          if self.class.each_proc.present?
+            each_proc.call(columns!, run_record, i)
+          end
+
           yield(columns!, run_record, i)
         end
       end
     end
 
     class << self
+
       protected
 
       def set(title, key)
@@ -104,6 +111,10 @@ module ExportTo
       def joins(relation)
         self.join_relation = relation
       end
+
+      def each_with(&block)
+        self.each_proc = block
+      end
     end
 
     private
@@ -111,7 +122,7 @@ module ExportTo
     def columns!
       self.class.body_keys.map do |key|
         data = object.send(key)
-        data = data.gsub("\n", " ").gsub("\r", " ") if data.is_a?(String) 
+        data = data.gsub("\n", " ").gsub("\r", " ") if data.is_a?(String)
         data
       end
     end

@@ -10,6 +10,10 @@ describe "ExportUser" do
 
     joins :wallets
 
+    each_with do |columns, user, i|
+      # TODO:
+    end
+
     presenter do
       def full_name
         "#{first_name} #{last_name}"
