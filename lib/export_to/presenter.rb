@@ -1,15 +1,15 @@
 module ExportTo
   class Presenter
-    attr_accessor :model, :relation
+    attr_accessor :model, :relation, :x, :y
     NoAttributeError = Class.new(NoMethodError)
 
-    def initialize(model, relation=nil)
-      self.model = model
-      self.relation = relation
+    def initialize(model, relation=nil, x, y)
+      self.model, self.relation = model, relation
+      self.x, self.y = x, y
     end
 
     def relation?
-      relation != nil
+      relation.present?
     end
 
     def method_missing(m, *args, &block)

@@ -59,7 +59,7 @@ module ExportTo
 
       join_relation = self.class.join_relation
 
-      self.records.each do |record|
+      self.records.each_with_index do |record, x|
         run_records = if join_relation.present? && record.send(join_relation).present?
           record.send(join_relation)
         else
@@ -67,12 +67,12 @@ module ExportTo
         end
 
         # 指定目前 order 讓 subclass 可以 override
-        run_records.each do |run_record|
+        run_records.each_with_index do |run_record, y|
           i = i + 1
           self.object = if run_record != record
-            self.class.presenter_klass.new(record, run_record)
+            self.class.presenter_klass.new(record, run_record, x, y)
           else
-            self.class.presenter_klass.new(run_record)
+            self.class.presenter_klass.new(run_record, nil, x, y)
           end
 
           if self.class.each_proc.present?
