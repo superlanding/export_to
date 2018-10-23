@@ -40,11 +40,27 @@ describe "ExportUser" do
     @export = ExportUser.new(@users)
   end
 
-  describe "#to_xlsx" do
+  describe "#to_xlsx_file" do
     should "will not throw exception" do
       Time.stub(:now, Time.parse('2018/10/10 10:00:00')) do
-        assert_equal "/temp/orders_1539136800.xlsx", @export.to_xlsx('/temp', "orders")
+        file = "/tmp/orders_1539136800.xlsx"
+        File.delete(file) if File.exists?(file)
+        assert_equal file, @export.to_xlsx_file('/tmp', "orders")
       end
+    end
+  end
+
+  describe "#to_xlsx" do
+    should "will not throw exception" do
+      @export.to_xlsx
+      assert true
+    end
+  end
+
+  describe "#to_xls" do
+    should "will not throw exception" do
+      @export.to_xls
+      assert true
     end
   end
 

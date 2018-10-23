@@ -5,38 +5,48 @@ module ExportTo
     class_attribute :presenter_klass
     class_attribute :join_relation
     class_attribute :each_proc, :each_method
+    class_attribute :xlsx_file_path, :xlsx_file_name
 
     # 預設 presenter
     self.presenter_klass = Presenter
     self.each_method = :each
+    self.xlsx_file_path = '/tmp'
+    self.xlsx_file_name = '/file'
 
     attr_accessor :object
 
     def to_csv
       CSV.generate do |csv|
-        rows!.each_with_index do |columns, x|
+        rows! do |columns, model, x|
           csv << columns
         end
       end
     end
 
     # 新版 Excel
-    def to_xlsx(file_path="tmp", filename="export")
-      file_name = "#{file_path}/#{filename}_#{Time.now.to_i}.xlsx"
-      workbook = FastExcel.open(file_name, constant_memory: true)
+    def to_xlsx(file_path=nil, file_name=nil)
+      file_path ||= self.class.xlsx_file_path
+      file_name ||= self.class.xlsx_file_name
+      path = to_xlsx_file(file_path, file_name)
+      # TODO: 讀取檔案回傳
+      File.open(path, 'rb') { |f| f.read }
+    end
+
+    # 新版 Excel (outpuut: path)
+    def to_xlsx_file(file_path="tmp", file_name="export")
+      path = "#{file_path}/#{file_name}_#{Time.now.to_i}.xlsx"
+      workbook = FastExcel.open(path, constant_memory: true)
       worksheet = workbook.add_worksheet("Default")
 
       bold = workbook.bold_cell_format
       worksheet.set_row(0, FastExcel::DEF_COL_WIDTH, bold)
 
-      rows!.each_with_index do |columns, x|
-        columns.each_with_index do |column, y|
-          worksheet.write_row(x, columns)
-        end
+      rows! do |columns, model, x|
+        worksheet.write_row(x, columns)
       end
+
       workbook.close
-      
-      file_name
+      path
     end
 
     # 舊版 Excel
@@ -44,7 +54,7 @@ module ExportTo
       book = Spreadsheet::Workbook.new
       sheet = book.create_worksheet
 
-      rows!.each_with_index do |columns, x|
+      rows! do |columns, model, x|
         sheet.row(x).concat(columns)
       end
 
@@ -55,11 +65,18 @@ module ExportTo
 
     protected
 
+    def rows
+      data = []
+      rows! do |columns, model, x|
+        data.push(columns)
+      end
+      data
+    end
+
     def rows!
       i = 0
 
-      rows = []
-      rows.push(self.class.head_titles)
+      yield(self.class.head_titles, nil, i)
 
       join_relation = self.class.join_relation
 
@@ -85,11 +102,9 @@ module ExportTo
             each_proc.call(columns, object, i)
           end
 
-          rows.push(columns)
+          yield(columns, run_record, x)
         end
       end
-
-      rows
     end
 
     def each_models(&block)
