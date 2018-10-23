@@ -10,7 +10,7 @@ describe "ExportUser" do
 
     joins :wallets
 
-    each_with do |columns, presenter, i|
+    each_with do |presenter|
 
     end
 

@@ -96,11 +96,9 @@ module ExportTo
             self.class.presenter_klass.new(run_record, nil, x, y)
           end
 
-          columns = fetch_columns!(object)
+          each_proc.call(object) if self.class.each_proc.present?
 
-          if self.class.each_proc.present?
-            each_proc.call(columns, object, i)
-          end
+          columns = fetch_columns!(object)
 
           yield(columns, run_record, x)
         end
