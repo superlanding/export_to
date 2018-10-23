@@ -100,7 +100,7 @@ module ExportTo
 
           columns = fetch_columns!(object)
 
-          yield(columns, run_record, x)
+          yield(columns, run_record, i)
         end
       end
     end
