@@ -10,8 +10,8 @@ describe "ExportUser" do
 
     joins :wallets
 
-    each_with do |columns, user, i|
-      # TODO:
+    each_with do |columns, presenter, i|
+
     end
 
     presenter do
@@ -38,6 +38,14 @@ describe "ExportUser" do
       User.new('Vegeta', 'Lu', '+886938234134', 'Taipei city', [ Wallet.new(1000), Wallet.new(2000) ])
     ]
     @export = ExportUser.new(@users)
+  end
+
+  describe "#to_xlsx" do
+    should "will not throw exception" do
+      Time.stub(:now, Time.parse('2018/10/10 10:00:00')) do
+        assert_equal "/temp/orders_1539136800.xlsx", @export.to_xlsx('/temp', "orders")
+      end
+    end
   end
 
   describe "#to_csv" do

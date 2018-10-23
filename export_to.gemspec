@@ -28,9 +28,8 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency "minitest", "~> 5.0"
   spec.add_development_dependency "shoulda-context"
 
-  spec.add_dependency "write_xlsx"
+  spec.add_dependency "fast_excel"
   spec.add_dependency "spreadsheet"
-  spec.add_dependency "roo"
   spec.add_dependency "iconv"
   spec.add_dependency "activesupport"
 end

@@ -4,10 +4,11 @@ module ExportTo
     class_attribute :body_keys
     class_attribute :presenter_klass
     class_attribute :join_relation
-    class_attribute :each_proc
+    class_attribute :each_proc, :each_method
 
     # 預設 presenter
     self.presenter_klass = Presenter
+    self.each_method = :each
 
     attr_accessor :object
 
@@ -20,22 +21,22 @@ module ExportTo
     end
 
     # 新版 Excel
-    def to_xlsx
-      io = StringIO.new
-      book = WriteXLSX.new(io)
-      sheet = book.add_worksheet
+    def to_xlsx(file_path="tmp", filename="export")
+      file_name = "#{file_path}/#{filename}_#{Time.now.to_i}.xlsx"
+      workbook = FastExcel.open(file_name, constant_memory: true)
+      worksheet = workbook.add_worksheet("Default")
 
-      # 表格頭 (粗體紅字)
-      format_head = book.add_format.tap { |f| f.set_bold }.tap { |f| f.set_color('red') }
+      bold = workbook.bold_cell_format
+      worksheet.set_row(0, FastExcel::DEF_COL_WIDTH, bold)
 
       rows!.each_with_index do |columns, x|
         columns.each_with_index do |column, y|
-          sheet.write(x, y, column, format_head)
+          worksheet.write_row(x, columns)
         end
       end
+      workbook.close
       
-      book.close
-      io.string
+      file_name
     end
 
     # 舊版 Excel
@@ -62,7 +63,7 @@ module ExportTo
 
       join_relation = self.class.join_relation
 
-      self.records.each_with_index do |record, x|
+      each_models do |record, x|
         run_records = if join_relation.present? && record.send(join_relation).present?
           record.send(join_relation)
         else
@@ -89,6 +90,25 @@ module ExportTo
       end
 
       rows
+    end
+
+    def each_models(&block)
+      case self.class.each_method
+      when :each
+        records.each.with_index(&block)
+      when :find_in_batches
+        find_in_batches(&block)
+      end
+    end
+
+    def find_in_batches
+      i = 0
+      records.find_in_batches do |group|
+        group.each do |model|
+          yield(model, i)
+          i = i + 1
+        end
+      end
     end
 
     class << self
