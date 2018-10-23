@@ -161,7 +161,7 @@ module ExportTo
 
     def fetch_columns!(object)
       self.class.body_keys.map do |key|
-        data = object.send(key)
+        data = (object.send(key) || "")
         data = data.gsub("\n", " ").gsub("\r", " ") if data.is_a?(String)
         data
       end
