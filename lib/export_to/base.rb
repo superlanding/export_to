@@ -13,7 +13,7 @@ module ExportTo
 
     def to_csv
       CSV.generate do |csv|
-        each do |columns, order, i|
+        rows!.each_with_index do |columns, x|
           csv << columns
         end
       end
@@ -28,12 +28,12 @@ module ExportTo
       # 表格頭 (粗體紅字)
       format_head = book.add_format.tap { |f| f.set_bold }.tap { |f| f.set_color('red') }
 
-      each do |columns, order, x|
+      rows!.each_with_index do |columns, x|
         columns.each_with_index do |column, y|
           sheet.write(x, y, column, format_head)
         end
       end
-
+      
       book.close
       io.string
     end
@@ -43,9 +43,10 @@ module ExportTo
       book = Spreadsheet::Workbook.new
       sheet = book.create_worksheet
 
-      each do |columns, order, x|
+      rows!.each_with_index do |columns, x|
         sheet.row(x).concat(columns)
       end
+
       spreadsheet = StringIO.new
       book.write(spreadsheet)
       spreadsheet.string
@@ -53,9 +54,11 @@ module ExportTo
 
     protected
 
-    def each
+    def rows!
       i = 0
-      yield(self.class.head_titles, nil, i)
+
+      rows = []
+      rows.push(self.class.head_titles)
 
       join_relation = self.class.join_relation
 
@@ -69,19 +72,23 @@ module ExportTo
         # 指定目前 order 讓 subclass 可以 override
         run_records.each_with_index do |run_record, y|
           i = i + 1
-          self.object = if run_record != record
+          object = if run_record != record
             self.class.presenter_klass.new(record, run_record, x, y)
           else
             self.class.presenter_klass.new(run_record, nil, x, y)
           end
 
+          columns = fetch_columns!(object)
+
           if self.class.each_proc.present?
-            each_proc.call(columns!, run_record, i)
+            each_proc.call(columns, object, i)
           end
 
-          yield(columns!, run_record, i)
+          rows.push(columns)
         end
       end
+
+      rows
     end
 
     class << self
@@ -119,7 +126,7 @@ module ExportTo
 
     private
 
-    def columns!
+    def fetch_columns!(object)
       self.class.body_keys.map do |key|
         data = object.send(key)
         data = data.gsub("\n", " ").gsub("\r", " ") if data.is_a?(String)
