@@ -2,6 +2,7 @@ module ExportTo
   class Base < Struct.new(:records)
     class_attribute :head_titles
     class_attribute :body_keys
+    class_attribute :body_column_proc
     class_attribute :presenter_klass
     class_attribute :join_relation
     class_attribute :each_proc, :each_method
@@ -128,11 +129,14 @@ module ExportTo
 
       protected
 
-      def set(title, key)
+      def set(title, key, &block)
         self.head_titles ||= []
         self.body_keys ||= []
+        self.body_column_proc ||= []
+
         self.head_titles.push(title)
         self.body_keys.push(key)
+        self.body_column_proc.push(block)
       end
 
       def presenter(&block)
@@ -160,8 +164,18 @@ module ExportTo
     private
 
     def fetch_columns!(object)
-      self.class.body_keys.map do |key|
-        data = (object.send(key) || "")
+      self.class.body_keys.map.with_index do |key, i|
+        data = case key
+        when String
+          key
+        when Symbol
+          (object.send(key) || "")
+        end
+
+        column_proc = self.class.body_column_proc[i]
+
+        data = self.class.body_column_proc[i].call(data) if column_proc.present?
+
         data = data.gsub("\n", " ").gsub("\r", " ") if data.is_a?(String)
         data
       end

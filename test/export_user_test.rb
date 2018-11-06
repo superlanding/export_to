@@ -6,7 +6,9 @@ describe "ExportUser" do
     set '名字', :full_name
     set '手機', :mobile
     set '地址', :address
-    set '金額', :amount
+    set '金額', :amount do |amount|
+      amount + 100
+    end
 
     joins :wallets
 
@@ -104,7 +106,7 @@ describe "ExportUser" do
       end
 
       should "[1, 3] = '0'" do
-        assert_equal '0', @rows[1][3]
+        assert_equal '100', @rows[1][3]
       end
 
       should "[2, 0] = 'Vegeta Lu'" do
@@ -119,12 +121,12 @@ describe "ExportUser" do
         assert_equal 'Taipei city', @rows[2][2]
       end
 
-      should "[2, 3] = '1000'" do
-        assert_equal '1000', @rows[2][3]
+      should "[2, 3] = '1100'" do
+        assert_equal '1100', @rows[2][3]
       end
 
-      should "[3, 3] = '2000'" do
-        assert_equal '2000', @rows[3][3]
+      should "[3, 3] = '2100'" do
+        assert_equal '2100', @rows[3][3]
       end
     end
   end
