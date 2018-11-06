@@ -173,10 +173,7 @@ module ExportTo
         end
 
         column_proc = self.class.body_column_proc[i]
-
         data = self.class.body_column_proc[i].call(data) if column_proc.present?
-
-        data = data.gsub("\n", " ").gsub("\r", " ") if data.is_a?(String)
         data
       end
     end
