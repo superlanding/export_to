@@ -3,12 +3,13 @@ require "test_helper"
 describe "ExportUser" do
 
   class ExportUser < ExportTo::Base
+
+    amount_proc = -> ( value ) { value + 100 }
+
     set '名字', :full_name
     set '手機', :mobile
     set '地址', :address
-    set '金額', :amount do |amount|
-      amount + 100
-    end
+    set '金額', :amount, &amount_proc
 
     joins :wallets
 
