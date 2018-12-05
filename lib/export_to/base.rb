@@ -35,7 +35,7 @@ module ExportTo
 
     # 新版 Excel (outpuut: path)
     def to_xlsx_file(file_path="tmp", file_name="export")
-      path = "#{file_path}/#{file_name}_#{Time.now.to_i}.xlsx"
+      path = "#{file_path}/#{file_name}_#{Time.now.to_i}_#{SecureRandom.hex}.xlsx"
       workbook = FastExcel.open(path, constant_memory: true)
       worksheet = workbook.add_worksheet("Default")
 
