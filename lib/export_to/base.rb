@@ -17,7 +17,7 @@ module ExportTo
     attr_accessor :object
 
     def to_csv
-      CSV.generate do |csv|
+      CSV.generate(force_quotes: true) do |csv|
         rows! do |columns, model, x|
           csv << columns
         end
