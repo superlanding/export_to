@@ -6,10 +6,10 @@ describe "ExportUser" do
 
     amount_proc = -> ( value ) { value + 100 }
 
-    set '名字', :full_name
-    set '手機', :mobile
+    set '名字', :full_name, format: { width: 50 }
+    set '手機', :mobile, format: { width: 100, bold: true }
     set '地址', :address
-    set '金額', :amount, &amount_proc
+    set '金額', :amount, format: { width: 40 }, &amount_proc
 
     joins :wallets
 
@@ -45,15 +45,14 @@ describe "ExportUser" do
 
   describe "#to_xlsx" do
     should "will not throw exception" do
-      @export.to_xlsx
-      assert true
+      File.open('/Users/adz/Documents/xxxx.xlsx', 'wb') {|f| f.write(@export.to_xlsx) }
+      assert @export.to_xlsx.present?
     end
   end
 
   describe "#to_xls" do
     should "will not throw exception" do
-      @export.to_xls
-      assert true
+      assert @export.to_xls.present?
     end
   end
 

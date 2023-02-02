@@ -4,6 +4,7 @@ module ExportTo
 
       def export
         rows.each! do |columns, model, x|
+          worksheet.set_row(x, height, nil)
           worksheet.write_row(x, columns)
         end
 
@@ -19,32 +20,43 @@ module ExportTo
       def worksheet
         @worksheet ||= begin
           ws = workbook.add_worksheet(options.fetch(:worksheet) { "Default" })
-          ws.auto_width = true if auto_width?
-          ws.set_row(0, height, bold)
+          # 設定表頭樣式
+          ws.set_row(0, height, head_format)
+
+          # 表身樣式
+          column_formats.each_with_index do |format, i|
+            next if format.blank?
+
+            width = format.delete(:width) { FastExcel::DEF_COL_WIDTH }
+
+            puts "#{i} -> #{width} -> #{format}"
+
+            ws.set_column(i, i, width, workbook.add_format(format))
+          end
+
           ws
         end
       end
 
-      def bold
-        workbook.bold_cell_format
+      def head_format
+        workbook.add_format(bold: true, bg_color: "#e5dbad", align: { h: :center })
       end
 
       def options
-        @options ||= (rows.options || {})
+        @options ||= (rows.class.options || {})
       end
 
       def worksheet_name
         options.fetch(:worksheet) { "Default" }
       end
 
-      def auto_width?
-        options.fetch(:auto_width) { true }
-      end
-
       def height
-        options.fetch(:height) { 10 }
+        options.fetch(:height) { 20 }
       end
 
+      def column_formats
+        @column_formats ||= rows.class.column_formats.dup || []
+      end
     end
   end
 end
