@@ -3,7 +3,7 @@ module ExportTo
     class_attribute :options
     class_attribute :head_titles
     class_attribute :body_keys
-    class_attribute :column_formats
+    class_attribute :column_options
     class_attribute :body_column_proc
 
     class_attribute :presenter_klass
@@ -99,15 +99,15 @@ module ExportTo
         self.options = options
       end
 
-      def set(title, key, format: {}, &block)
+      def set(title, key, options={}, &block)
         self.head_titles ||= []
         self.body_keys ||= []
-        self.column_formats ||= []
+        self.column_options ||= []
         self.body_column_proc ||= []
 
         self.head_titles.push(title)
         self.body_keys.push(key)
-        self.column_formats.push(format)
+        self.column_options.push(options)
         self.body_column_proc.push(block)
       end
 

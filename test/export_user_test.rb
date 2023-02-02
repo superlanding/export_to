@@ -6,10 +6,10 @@ describe "ExportUser" do
 
     amount_proc = -> ( value ) { value + 100 }
 
-    set '名字', :full_name, format: { width: 50 }
-    set '手機', :mobile, format: { width: 100, bold: true }
+    set '名字', :full_name, width: 50
+    set '手機', :mobile, width: 100, format: { bold: true }
     set '地址', :address
-    set '金額', :amount, format: { width: 40 }, &amount_proc
+    set '金額', :amount, width: 40, &amount_proc
 
     joins :wallets
 
