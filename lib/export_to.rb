@@ -8,6 +8,9 @@ require 'iconv'
 require 'export_to/version'
 require 'export_to/presenter'
 require 'export_to/base'
+require 'export_to/exporter/csv'
+require 'export_to/exporter/xls'
+require 'export_to/exporter/xlsx'
 
 module ExportTo
 end

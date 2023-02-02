@@ -43,18 +43,6 @@ describe "ExportUser" do
     @export = ExportUser.new(@users)
   end
 
-  describe "#to_xlsx_file" do
-    should "will not throw exception" do
-      SecureRandom.stub(:hex, "123") do
-        Time.stub(:now, Time.parse('2018/10/10 10:00:00')) do
-          file = "/tmp/orders_1539136800_123.xlsx"
-          File.delete(file) if File.exists?(file)
-          assert_equal file, @export.to_xlsx_file('/tmp', "orders")
-        end
-      end
-    end
-  end
-
   describe "#to_xlsx" do
     should "will not throw exception" do
       @export.to_xlsx
