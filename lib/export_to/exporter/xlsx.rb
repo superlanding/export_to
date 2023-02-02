@@ -2,7 +2,7 @@ module ExportTo
   module Exporter
     class Xlsx < Struct.new(:rows)
 
-      def export(file_path=nil, file_name=nil)
+      def export
         workbook = FastExcel.open(constant_memory: true)
         worksheet = workbook.add_worksheet("Default")
 
@@ -15,6 +15,7 @@ module ExportTo
 
         workbook.read_string
       end
+
     end
   end
 end

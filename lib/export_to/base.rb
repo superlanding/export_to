@@ -9,13 +9,10 @@ module ExportTo
     class_attribute :presenter_klass
     class_attribute :join_relation
     class_attribute :each_proc, :each_method
-    class_attribute :xlsx_file_path, :xlsx_file_name
 
     # 預設 presenter
     self.presenter_klass = Presenter
     self.each_method = :each
-    self.xlsx_file_path = '/tmp'
-    self.xlsx_file_name = '/file'
 
     attr_accessor :object
 
@@ -24,8 +21,8 @@ module ExportTo
     end
 
     # 新版 Excel
-    def to_xlsx(file_path=nil, file_name=nil)
-      ExportTo::Exporter::Xlsx.new(self).export(file_path, file_name)
+    def to_xlsx
+      ExportTo::Exporter::Xlsx.new(self).export
     end
 
     # 舊版 Excel
