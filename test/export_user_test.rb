@@ -45,7 +45,6 @@ describe "ExportUser" do
 
   describe "#to_xlsx" do
     should "will not throw exception" do
-      File.open('/Users/adz/Documents/xxxx.xlsx', 'wb') {|f| f.write(@export.to_xlsx) }
       assert @export.to_xlsx.present?
     end
   end
