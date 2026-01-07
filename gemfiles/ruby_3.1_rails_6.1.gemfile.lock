@@ -1,7 +1,7 @@
 PATH
   remote: ..
   specs:
-    export_to (1.1.0)
+    export_to (1.1.1)
       activesupport (>= 6.0, < 8)
       fast_excel (~> 0.4)
       iconv (~> 1.0)
