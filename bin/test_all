@@ -1,0 +1,147 @@
+#!/usr/bin/env bash
+
+# Script to test the gem against multiple Ruby and Rails versions locally
+# Requires: rbenv or rvm to switch Ruby versions
+
+set -e
+
+# Define test matrix: ruby_version:rails_version
+TEST_MATRIX=(
+  "2.7.6:6.1"
+  "3.0.7:6.1"
+  "3.0.7:7.0"
+  "3.1.7:6.1"
+  "3.1.7:7.0"
+  "3.1.7:7.1"
+)
+
+SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+PROJECT_ROOT="$(dirname "$SCRIPT_DIR")"
+
+# Color output
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+BLUE='\033[0;34m'
+NC='\033[0m' # No Color
+
+echo "========================================================================"
+echo "Testing export_to gem against multiple Ruby & Rails versions"
+echo "========================================================================"
+echo ""
+
+# Check if rbenv or rvm is available
+if command -v rbenv &> /dev/null; then
+  RUBY_MANAGER="rbenv"
+  echo "Using rbenv for Ruby version management"
+elif command -v rvm &> /dev/null; then
+  RUBY_MANAGER="rvm"
+  echo "Using rvm for Ruby version management"
+else
+  echo -e "${RED}Error: Neither rbenv nor rvm found. Please install one of them.${NC}"
+  exit 1
+fi
+
+echo ""
+
+# Track results
+PASSED=0
+FAILED=0
+FAILED_TESTS=()
+
+for test_case in "${TEST_MATRIX[@]}"; do
+  # Split ruby version and rails version
+  ruby_version="${test_case%%:*}"
+  rails_version="${test_case##*:}"
+
+  echo "------------------------------------------------------------------------"
+  echo -e "${YELLOW}Testing with Ruby ${ruby_version} / Rails ${rails_version}${NC}"
+  echo "------------------------------------------------------------------------"
+
+  # Set Ruby version
+  if [ "$RUBY_MANAGER" == "rbenv" ]; then
+    if ! rbenv versions | grep -q "^[* ]*${ruby_version}"; then
+      echo -e "${RED}Ruby ${ruby_version} not installed in rbenv. Skipping...${NC}"
+      FAILED=$((FAILED + 1))
+      FAILED_TESTS+=("Ruby ${ruby_version} / Rails ${rails_version} (Ruby not installed)")
+      continue
+    fi
+    export RBENV_VERSION="${ruby_version}"
+  elif [ "$RUBY_MANAGER" == "rvm" ]; then
+    if ! rvm list | grep -q "ruby-${ruby_version}"; then
+      echo -e "${RED}Ruby ${ruby_version} not installed in rvm. Skipping...${NC}"
+      FAILED=$((FAILED + 1))
+      FAILED_TESTS+=("Ruby ${ruby_version} / Rails ${rails_version} (Ruby not installed)")
+      continue
+    fi
+    source ~/.rvm/scripts/rvm
+    rvm use "${ruby_version}"
+  fi
+
+  # Verify Ruby version
+  CURRENT_VERSION=$(ruby -v)
+  echo "Current Ruby version: ${CURRENT_VERSION}"
+
+  # Extract major.minor version for gemfile name
+  MAJOR_MINOR_VERSION=$(echo "${ruby_version}" | cut -d. -f1-2)
+
+  # Set BUNDLE_GEMFILE
+  export BUNDLE_GEMFILE="${PROJECT_ROOT}/gemfiles/ruby_${MAJOR_MINOR_VERSION}_rails_${rails_version}.gemfile"
+
+  echo "Using Gemfile: ${BUNDLE_GEMFILE}"
+
+  # Check if gemfile exists
+  if [ ! -f "${BUNDLE_GEMFILE}" ]; then
+    echo -e "${RED}✗ Gemfile not found: ${BUNDLE_GEMFILE}${NC}"
+    FAILED=$((FAILED + 1))
+    FAILED_TESTS+=("Ruby ${ruby_version} / Rails ${rails_version} (Gemfile not found)")
+    continue
+  fi
+
+  # Install dependencies
+  echo ""
+  echo "Installing dependencies..."
+  if bundle install --quiet; then
+    echo -e "${GREEN}✓ Dependencies installed${NC}"
+  else
+    echo -e "${RED}✗ Failed to install dependencies${NC}"
+    FAILED=$((FAILED + 1))
+    FAILED_TESTS+=("Ruby ${ruby_version} / Rails ${rails_version} (bundle install failed)")
+    continue
+  fi
+
+  # Run tests
+  echo ""
+  echo "Running tests..."
+  if bundle exec rake test; then
+    echo -e "${GREEN}✓ Tests passed for Ruby ${ruby_version} / Rails ${rails_version}${NC}"
+    PASSED=$((PASSED + 1))
+  else
+    echo -e "${RED}✗ Tests failed for Ruby ${ruby_version} / Rails ${rails_version}${NC}"
+    FAILED=$((FAILED + 1))
+    FAILED_TESTS+=("Ruby ${ruby_version} / Rails ${rails_version}")
+  fi
+
+  echo ""
+done
+
+# Summary
+echo "========================================================================"
+echo "Test Summary"
+echo "========================================================================"
+echo -e "Total: ${BLUE}$((PASSED + FAILED))${NC}"
+echo -e "Passed: ${GREEN}${PASSED}${NC}"
+echo -e "Failed: ${RED}${FAILED}${NC}"
+
+if [ ${FAILED} -gt 0 ]; then
+  echo ""
+  echo "Failed tests:"
+  for test in "${FAILED_TESTS[@]}"; do
+    echo -e "  ${RED}✗ ${test}${NC}"
+  done
+  exit 1
+else
+  echo ""
+  echo -e "${GREEN}All tests passed! 🎉${NC}"
+  exit 0
+fi

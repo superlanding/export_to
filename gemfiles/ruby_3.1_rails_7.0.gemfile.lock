@@ -1,0 +1,107 @@
+PATH
+  remote: ..
+  specs:
+    export_to (1.1.0)
+      activesupport (>= 6.0, < 8)
+      fast_excel (~> 0.4)
+      iconv (~> 1.0)
+      spreadsheet (~> 1.3)
+
+GEM
+  remote: https://rubygems.org/
+  specs:
+    actionpack (7.0.10)
+      actionview (= 7.0.10)
+      activesupport (= 7.0.10)
+      racc
+      rack (~> 2.0, >= 2.2.4)
+      rack-test (>= 0.6.3)
+      rails-dom-testing (~> 2.0)
+      rails-html-sanitizer (~> 1.0, >= 1.2.0)
+    actionview (7.0.10)
+      activesupport (= 7.0.10)
+      builder (~> 3.1)
+      erubi (~> 1.4)
+      rails-dom-testing (~> 2.0)
+      rails-html-sanitizer (~> 1.1, >= 1.2.0)
+    activesupport (7.0.10)
+      base64
+      benchmark (>= 0.3)
+      bigdecimal
+      concurrent-ruby (~> 1.0, >= 1.0.2)
+      drb
+      i18n (>= 1.6, < 2)
+      logger (>= 1.4.2)
+      minitest (>= 5.1)
+      mutex_m
+      securerandom (>= 0.3)
+      tzinfo (~> 2.0)
+    base64 (0.3.0)
+    benchmark (0.5.0)
+    bigdecimal (4.0.1)
+    builder (3.3.0)
+    concurrent-ruby (1.3.6)
+    crass (1.0.6)
+    drb (2.2.3)
+    erubi (1.13.1)
+    fast_excel (0.5.0)
+      ffi (> 1.9, < 2)
+    ffi (1.17.3-arm64-darwin)
+    i18n (1.14.8)
+      concurrent-ruby (~> 1.0)
+    iconv (1.1.1)
+    logger (1.7.0)
+    loofah (2.25.0)
+      crass (~> 1.0.2)
+      nokogiri (>= 1.12.0)
+    method_source (1.1.0)
+    minitest (5.27.0)
+    mutex_m (0.3.0)
+    nokogiri (1.18.10-arm64-darwin)
+      racc (~> 1.4)
+    racc (1.8.1)
+    rack (2.2.21)
+    rack-test (2.2.0)
+      rack (>= 1.3)
+    rails-dom-testing (2.3.0)
+      activesupport (>= 5.0.0)
+      minitest
+      nokogiri (>= 1.6)
+    rails-html-sanitizer (1.6.2)
+      loofah (~> 2.21)
+      nokogiri (>= 1.15.7, != 1.16.7, != 1.16.6, != 1.16.5, != 1.16.4, != 1.16.3, != 1.16.2, != 1.16.1, != 1.16.0.rc1, != 1.16.0)
+    railties (7.0.10)
+      actionpack (= 7.0.10)
+      activesupport (= 7.0.10)
+      method_source
+      rake (>= 12.2)
+      thor (~> 1.0)
+      zeitwerk (~> 2.5)
+    rake (13.3.1)
+    ruby-ole (1.2.13.1)
+    securerandom (0.4.1)
+    shoulda-context (2.0.0)
+    spreadsheet (1.3.4)
+      bigdecimal
+      logger
+      ruby-ole
+    thor (1.5.0)
+    tzinfo (2.0.6)
+      concurrent-ruby (~> 1.0)
+    zeitwerk (2.6.18)
+
+PLATFORMS
+  arm64-darwin-21
+
+DEPENDENCIES
+  activesupport (~> 7.0.0)
+  bundler (>= 2.0.0)
+  export_to!
+  logger (~> 1.5)
+  minitest (~> 5.0)
+  railties (~> 7.0.0)
+  rake (>= 13)
+  shoulda-context
+
+BUNDLED WITH
+   2.3.27

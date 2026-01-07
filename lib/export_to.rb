@@ -1,6 +1,7 @@
+require 'logger'
+require 'active_support'
 require 'active_support/core_ext/object'
 require 'active_support/core_ext/class'
-require 'active_support'
 require 'fast_excel'
 require 'spreadsheet'
 require 'csv'

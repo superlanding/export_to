@@ -14,6 +14,8 @@ Gem::Specification.new do |spec|
   spec.homepage      = "https://github.com/superlanding/export_to"
   spec.license       = "MIT"
 
+  spec.required_ruby_version = ">= 2.7.0", "< 3.2.0"
+
   # Specify which files should be added to the gem when it is released.
   # The `git ls-files -z` loads the files in the RubyGem that have been added into git.
   spec.files         = Dir.chdir(File.expand_path('..', __FILE__)) do
@@ -28,8 +30,8 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency "minitest", "~> 5.0"
   spec.add_development_dependency "shoulda-context"
 
-  spec.add_dependency "fast_excel"
-  spec.add_dependency "spreadsheet"
-  spec.add_dependency "iconv"
-  spec.add_dependency "activesupport", ">= 6", "< 7"
+  spec.add_dependency "fast_excel", "~> 0.4"
+  spec.add_dependency "spreadsheet", "~> 1.3"
+  spec.add_dependency "iconv", "~> 1.0"
+  spec.add_dependency "activesupport", ">= 6.0", "< 8"
 end

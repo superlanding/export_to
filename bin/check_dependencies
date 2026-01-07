@@ -1,0 +1,58 @@
+#!/usr/bin/env ruby
+
+# Script to check if all dependencies support multiple Ruby and Rails versions
+
+require 'open3'
+require 'json'
+
+TEST_MATRIX = [
+  { ruby: '2.7', rails: '6.1' },
+  { ruby: '3.0', rails: '6.1' },
+  { ruby: '3.0', rails: '7.0' },
+  { ruby: '3.1', rails: '6.1' },
+  { ruby: '3.1', rails: '7.0' },
+  { ruby: '3.1', rails: '7.1' }
+]
+
+puts "=" * 80
+puts "Checking dependency compatibility"
+puts "=" * 80
+puts
+
+TEST_MATRIX.each do |test|
+  gemfile = "gemfiles/ruby_#{test[:ruby]}_rails_#{test[:rails]}.gemfile"
+
+  puts "\n#{'-' * 80}"
+  puts "Checking Ruby #{test[:ruby]} / Rails #{test[:rails]}"
+  puts "Gemfile: #{gemfile}"
+  puts '-' * 80
+
+  unless File.exist?(gemfile)
+    puts "✗ Gemfile not found"
+    next
+  end
+
+  ENV['BUNDLE_GEMFILE'] = gemfile
+
+  stdout, stderr, status = Open3.capture3("bundle install --quiet")
+
+  if status.success?
+    puts "✓ Bundle install successful"
+
+    # Check for outdated dependencies
+    stdout, stderr, status = Open3.capture3("bundle outdated")
+    if stdout.strip.empty?
+      puts "✓ All dependencies are up to date"
+    else
+      puts "\nOutdated dependencies:"
+      puts stdout
+    end
+  else
+    puts "✗ Bundle install failed"
+    puts stderr
+  end
+end
+
+puts "\n" + "=" * 80
+puts "Dependency check completed"
+puts "=" * 80
