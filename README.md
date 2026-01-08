@@ -30,6 +30,8 @@ This gem supports:
 - Ruby 2.7 with Rails 6.1
 - Ruby 3.0 with Rails 6.1, 7.0
 - Ruby 3.1 with Rails 6.1, 7.0, 7.1
+- Ruby 3.2 with Rails 7.0, 7.1
+- Ruby 3.3 with Rails 7.1
 
 ## Development
 
