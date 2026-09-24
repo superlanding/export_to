@@ -1,8 +1,9 @@
 PATH
   remote: ..
   specs:
-    export_to (1.1.2)
-      activesupport (>= 6.0, < 8)
+    export_to (1.2.1)
+      activesupport (>= 6.0, < 8.2)
+      csv
       fast_excel (~> 0.4)
       iconv (~> 1.0)
       spreadsheet (~> 1.3)
@@ -29,15 +30,17 @@ GEM
       minitest (>= 5.1)
       tzinfo (~> 2.0)
       zeitwerk (~> 2.3)
-    bigdecimal (4.0.1)
+    bigdecimal (4.1.3)
     builder (3.3.0)
-    concurrent-ruby (1.3.6)
+    concurrent-ruby (1.3.8)
     crass (1.0.6)
+    csv (3.3.6)
     erubi (1.13.1)
     fast_excel (0.5.0)
       ffi (> 1.9, < 2)
-    ffi (1.17.3)
-    i18n (1.14.8)
+    ffi (1.17.4-arm64-darwin)
+    ffi (1.17.4-x86_64-linux-gnu)
+    i18n (1.15.2)
       concurrent-ruby (~> 1.0)
     iconv (1.1.1)
     logger (1.7.0)
@@ -45,10 +48,10 @@ GEM
       crass (~> 1.0.2)
       nokogiri (>= 1.12.0)
     method_source (1.1.0)
-    minitest (5.26.1)
-    nokogiri (1.15.7-arm64-darwin)
-      racc (~> 1.4)
-    nokogiri (1.15.7-x86_64-linux)
+    mini_portile2 (2.8.9)
+    minitest (5.27.0)
+    nokogiri (1.15.7)
+      mini_portile2 (~> 2.8.2)
       racc (~> 1.4)
     racc (1.8.1)
     rack (2.2.21)
@@ -70,14 +73,14 @@ GEM
     rake (13.3.1)
     ruby-ole (1.2.13.1)
     shoulda-context (2.0.0)
-    spreadsheet (1.3.4)
+    spreadsheet (1.3.5)
       bigdecimal
       logger
       ruby-ole
     thor (1.5.0)
     tzinfo (2.0.6)
       concurrent-ruby (~> 1.0)
-    zeitwerk (2.6.18)
+    zeitwerk (2.8.3)
 
 PLATFORMS
   arm64-darwin-21
