@@ -6,13 +6,22 @@
 set -e
 
 # Define test matrix: ruby_version:rails_version
+# Keep in sync with the matrix in .github/workflows/ci.yml (and gemfiles/).
+# ruby_version is "major.minor"; the newest installed patch version is used.
 TEST_MATRIX=(
-  "2.7.6:6.1"
-  "3.0.7:6.1"
-  "3.0.7:7.0"
-  "3.1.7:6.1"
-  "3.1.7:7.0"
-  "3.1.7:7.1"
+  "2.7:6.1"
+  "3.0:6.1"
+  "3.0:7.0"
+  "3.1:6.1"
+  "3.1:7.0"
+  "3.1:7.1"
+  "3.2:7.0"
+  "3.2:7.1"
+  "3.3:7.1"
+  "3.3:8.0"
+  "3.3:8.1"
+  "3.4:8.0"
+  "3.4:8.1"
 )
 
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
@@ -60,13 +69,14 @@ for test_case in "${TEST_MATRIX[@]}"; do
 
   # Set Ruby version
   if [ "$RUBY_MANAGER" == "rbenv" ]; then
-    if ! rbenv versions | grep -q "^[* ]*${ruby_version}"; then
+    installed_version="$(rbenv versions --bare | grep -E "^${ruby_version//./\\.}\\." | sort -V | tail -n 1)"
+    if [ -z "${installed_version}" ]; then
       echo -e "${RED}Ruby ${ruby_version} not installed in rbenv. Skipping...${NC}"
       FAILED=$((FAILED + 1))
       FAILED_TESTS+=("Ruby ${ruby_version} / Rails ${rails_version} (Ruby not installed)")
       continue
     fi
-    export RBENV_VERSION="${ruby_version}"
+    export RBENV_VERSION="${installed_version}"
   elif [ "$RUBY_MANAGER" == "rvm" ]; then
     if ! rvm list | grep -q "ruby-${ruby_version}"; then
       echo -e "${RED}Ruby ${ruby_version} not installed in rvm. Skipping...${NC}"

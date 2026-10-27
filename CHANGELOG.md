@@ -16,6 +16,21 @@
 
 - `README.md`、`CHANGELOG.md` 改以繁體中文（zh-TW）撰寫。
 
+## [1.3.0] - 2026-10-27
+
+### Fixed
+
+- `ExportTo::Base#each` 每次呼叫都會 raise `NoMethodError (undefined method 'rows!')`。現在會回傳所有列組成的 Array（第一列是標題列，內容與 `#to_csv` 相同）；帶 block 時會逐列 yield 並回傳 exporter 本身，因此 Enumerable 方法（`map`、`to_a` 等）也能使用。`#each!` 沒有變動。
+- `TESTING.md` 與 `bin/test_all` 已過時（只涵蓋 Ruby 2.7–3.1）。現在它們的說明與執行內容都與 `.github/workflows/ci.yml` 的矩陣一致。
+
+### Deprecated
+
+- `ExportTo::Base#to_xls`：自 1.0.0 起它回傳的就是 **XLSX** 資料（與 `#to_xlsx` 相同），而不是舊版 `.xls` 檔。為了不讓既有呼叫端壞掉，回傳值維持不變，但現在會印出一次性的 `[DEPRECATION]` 警告（輸出到 `$stderr`，每個 process 一次）。請改用 `#to_xlsx`；若要真正的 `.xls`，請用 `ExportTo::Exporter::Xls.new(export).to_xls`。未來的 major 版本可能會讓 `#to_xls` 回傳真正的 `.xls` 檔，或將它移除。
+
+### Added
+
+- 測試：`#each`、`#to_xls` 的相容性（仍回傳 XLSX）與其棄用警告、`#to_xlsx` / `ExportTo::Exporter::Xls` 的輸出格式。
+
 ## [1.2.1] - 2026-10-27
 
 ### Added
@@ -85,7 +100,8 @@
 
 - 首次發佈：`ExportTo::Base` DSL（`set`、`joins`、`presenter`、`each_with`）、帶有列計數器的 presenter、空的 join relation 處理，以及 `to_xlsx`。
 
-[Unreleased]: https://github.com/superlanding/export_to/compare/v1.2.1...HEAD
+[Unreleased]: https://github.com/superlanding/export_to/compare/v1.3.0...HEAD
+[1.3.0]: https://github.com/superlanding/export_to/compare/v1.2.1...v1.3.0
 [1.2.1]: https://github.com/superlanding/export_to/compare/v1.2.0...v1.2.1
 [1.2.0]: https://github.com/superlanding/export_to/compare/v1.1.2...v1.2.0
 [1.1.2]: https://github.com/superlanding/export_to/compare/v1.1.1...v1.1.2

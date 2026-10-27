@@ -1,103 +1,45 @@
 # Testing Guide
 
-This gem supports multiple Ruby and Rails versions:
-- Ruby 2.7 with Rails 6.1
-- Ruby 3.0 with Rails 6.1, 7.0
-- Ruby 3.1 with Rails 6.1, 7.0, 7.1
+Tests use Minitest + shoulda-context (`test/**/*_test.rb`) and run against several Ruby / Rails combinations.
 
-## Multi-Version Testing
+The supported matrix is defined in **one place**: [`.github/workflows/ci.yml`](.github/workflows/ci.yml). Each combination has a gemfile `gemfiles/ruby_<ruby>_rails_<rails>.gemfile`. Lists of versions are intentionally not copied here so they cannot go stale; see the [README](README.md#requirements) for the current table.
 
-### Local Testing
+## Run the tests for one combination
 
-#### Test all Ruby versions at once
+CI selects the gemfile with `BUNDLE_GEMFILE`; do the same locally (switch to the matching Ruby first, e.g. with rbenv):
 
-Run the test suite against all supported Ruby versions:
+```bash
+export BUNDLE_GEMFILE=$PWD/gemfiles/ruby_3.4_rails_8.1.gemfile
+bundle install
+bundle exec rake test       # also: rake t / rake
+```
+
+## Run the whole CI matrix locally
 
 ```bash
 bin/test_all
 ```
 
-This script will:
-- Automatically switch between Ruby versions (requires rbenv or rvm)
-- Install dependencies for each version
-- Run the test suite for each version
-- Display a summary of results
+`bin/test_all` needs rbenv or rvm. For every entry of its `TEST_MATRIX` (kept equal to the CI matrix) it switches to the newest installed patch version of that Ruby, runs `bundle install` with the matching gemfile, runs `rake test` and prints a summary. A Ruby that is not installed is reported as a failure. When you change `ci.yml`, update `TEST_MATRIX` in `bin/test_all` as well.
 
-#### Test a specific Ruby/Rails version combination
-
-```bash
-# Ruby 2.7 with Rails 6.1
-export BUNDLE_GEMFILE=gemfiles/ruby_2.7_rails_6.1.gemfile
-bundle install
-bundle exec rake test
-
-# Ruby 3.0 with Rails 6.1
-export BUNDLE_GEMFILE=gemfiles/ruby_3.0_rails_6.1.gemfile
-bundle install
-bundle exec rake test
-
-# Ruby 3.0 with Rails 7.0
-export BUNDLE_GEMFILE=gemfiles/ruby_3.0_rails_7.0.gemfile
-bundle install
-bundle exec rake test
-
-# Ruby 3.1 with Rails 7.1
-export BUNDLE_GEMFILE=gemfiles/ruby_3.1_rails_7.1.gemfile
-bundle install
-bundle exec rake test
-```
-
-### Dependency Checking
-
-Check if all dependencies are compatible with all Ruby versions:
+## Check dependencies
 
 ```bash
 bin/check_dependencies
 ```
 
-This script will verify that all dependencies can be installed and will report any outdated gems.
+Verifies that the dependencies can be installed for the supported versions and reports outdated gems.
 
-## CI/CD
+## Adding a Ruby / Rails combination
 
-The gem uses GitHub Actions for continuous integration. Every push and pull request will automatically test against all supported combinations:
-- Ruby 2.7 / Rails 6.1
-- Ruby 3.0 / Rails 6.1, 7.0
-- Ruby 3.1 / Rails 6.1, 7.0, 7.1
+1. Add `gemfiles/ruby_<ruby>_rails_<rails>.gemfile` (copy a neighbouring one and change the `activesupport` / `railties` versions).
+2. Add the combination to the matrix in `.github/workflows/ci.yml` and to `TEST_MATRIX` in `bin/test_all`.
+3. Update the table in the README.
 
-See `.github/workflows/ci.yml` for the full configuration.
+## Lockfiles
 
-## Gemfiles Structure
+Some gemfiles have a committed `*.gemfile.lock`, and `Gemfile.lock` is committed too. They contain the gem's own version (`export_to (x.y.z)`), so **keep them consistent: bump the version in those files whenever `lib/export_to/version.rb` changes**.
 
-The `gemfiles/` directory contains version-specific Gemfiles for each Ruby/Rails combination:
-- `ruby_2.7_rails_6.1.gemfile` - Ruby 2.7 with Rails 6.1
-- `ruby_3.0_rails_6.1.gemfile` - Ruby 3.0 with Rails 6.1
-- `ruby_3.0_rails_7.0.gemfile` - Ruby 3.0 with Rails 7.0
-- `ruby_3.1_rails_6.1.gemfile` - Ruby 3.1 with Rails 6.1
-- `ruby_3.1_rails_7.0.gemfile` - Ruby 3.1 with Rails 7.0
-- `ruby_3.1_rails_7.1.gemfile` - Ruby 3.1 with Rails 7.1
+## CI
 
-Each gemfile has its own lockfile committed to the repository to ensure consistent dependency versions across environments.
-
-## Requirements
-
-### For Local Multi-Version Testing
-
-You need either:
-- **rbenv** with Ruby 2.7, 3.0, and 3.1 installed
-- **rvm** with Ruby 2.7, 3.0, and 3.1 installed
-
-### Installing Ruby Versions
-
-#### Using rbenv:
-```bash
-rbenv install 2.7.8
-rbenv install 3.0.6
-rbenv install 3.1.4
-```
-
-#### Using rvm:
-```bash
-rvm install 2.7.8
-rvm install 3.0.6
-rvm install 3.1.4
-```
+GitHub Actions runs every matrix entry on every push to `master` and on every pull request that targets `master`.

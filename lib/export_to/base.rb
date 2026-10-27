@@ -25,17 +25,25 @@ module ExportTo
       ExportTo::Exporter::Xlsx.new(self).export
     end
 
-    # 舊版 Excel
+    # 注意：名稱叫 xls，但自 1.0.0 起實際回傳的是 XLSX 內容（與 #to_xlsx 相同），
+    # 為了不破壞既有呼叫端，行為維持不變，僅在第一次呼叫時印出 deprecation 警告。
+    # 請改用 #to_xlsx；需要真正的舊版 .xls 請用 ExportTo::Exporter::Xls.new(export).to_xls
     def to_xls
-      ExportTo::Exporter::Xlsx.new(self).export
+      self.class.warn_to_xls_deprecated(caller_locations(1, 1).first)
+      to_xlsx
     end
 
+    # 回傳所有列（第一列是表頭）的二維陣列，與 CSV / XLSX 看到的內容一致。
+    # 給 block 時逐列 yield columns 並回傳 self（Enumerable 的方法因此可用）。
     def each
       data = []
-      rows! do |columns, model, x|
+      each! do |columns, _model, _index|
         data.push(columns)
       end
-      data
+      return data unless block_given?
+
+      data.each { |columns| yield(columns) }
+      self
     end
 
     def each!
@@ -92,6 +100,16 @@ module ExportTo
     end
 
     class << self
+      # to_xls 只警告一次（每個 process），避免洗版 log
+      def warn_to_xls_deprecated(location = nil)
+        return if Base.to_xls_warned
+        Base.to_xls_warned = true
+        where = location ? " (called from #{location})" : ""
+        Kernel.warn "[DEPRECATION] ExportTo::Base#to_xls returns XLSX data, not a legacy .xls file; " \
+                    "use #to_xlsx instead. #to_xls keeps this behavior for compatibility#{where}."
+      end
+
+      attr_accessor :to_xls_warned
 
       protected
 

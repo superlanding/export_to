@@ -3,9 +3,9 @@
 [![Gem Version](https://badge.fury.io/rb/export_to.svg)](https://rubygems.org/gems/export_to)
 [![CI](https://github.com/superlanding/export_to/actions/workflows/ci.yml/badge.svg)](https://github.com/superlanding/export_to/actions/workflows/ci.yml)
 
-用一套簡單的宣告式 DSL，把一批資料（ActiveRecord relation、Struct 陣列，或任何有 `each` 的物件）匯出成 **CSV**、**XLSX** 或 **XLS**。
+用一套簡單的宣告式 DSL，把一批資料（ActiveRecord relation、Struct 陣列，或任何有 `each` 的物件）匯出成 **CSV** 或 **XLSX**（透過較底層的 exporter，也能匯出舊版 **XLS**）。
 
-你只要在 `ExportTo::Base` 的子類別裡宣告一次欄位（標題、來源屬性、寬度、格式、值的轉換），需要計算欄位時可以加上 presenter，也可以加上 `joins` relation 把一筆資料展開成多列，最後呼叫 `to_csv` / `to_xlsx` / `to_xls` 即可。
+你只要在 `ExportTo::Base` 的子類別裡宣告一次欄位（標題、來源屬性、寬度、格式、值的轉換），需要計算欄位時可以加上 presenter，也可以加上 `joins` relation 把一筆資料展開成多列，最後呼叫 `to_csv` / `to_xlsx` 即可。
 
 ## 環境需求
 
@@ -87,6 +87,8 @@ export = UserExport.new(users)
 
 export.to_csv    # => String，每個欄位都有加引號（"Name","Mobile",...）
 export.to_xlsx   # => .xlsx 檔案的二進位 String
+export.each      # => 所有列組成的 Array，第一列是標題列：[["Name", "Mobile", ...], ["Eddie Li", ...], ...]
+export.each { |columns| ... }   # 逐列 yield（第一列是標題列），並回傳 exporter 本身；Enumerable 方法也能用
 ```
 
 兩位使用者的 CSV 輸出範例（第二位有兩個 wallet）：
@@ -112,8 +114,7 @@ end
 
 以下是目前程式碼的實際行為：
 
-- `ExportTo::Base#to_xls` 目前會委派給 **XLSX** exporter，所以回傳的是 xlsx 資料。若需要真正的舊版 `.xls` 檔，請用 `ExportTo::Exporter::Xls.new(export).to_xls`。
-- `ExportTo::Base#each` 會呼叫未定義的 `rows!`，並 raise `NoMethodError`。請改用 `each!`（會 yield `columns, record, index`，且第一筆是標題列），或使用 `to_*` 系列方法。
+- `ExportTo::Base#to_xls` **已棄用，而且名稱有誤導性**：自 1.0.0 起它回傳的是與 `#to_xlsx` 相同的 **XLSX** 資料（不是舊版 `.xls` 檔）。保留這個行為是為了不讓既有呼叫端壞掉；呼叫時會印出一次性的 `[DEPRECATION]` 警告。請改用 `#to_xlsx`。若需要真正的舊版 `.xls` 檔，請用 `ExportTo::Exporter::Xls.new(export).to_xls`（不會套用任何樣式選項）。
 - `width:` / `format:` 與 `excel` 選項只對 XLSX 輸出有效。
 - 子類別會共用上層 class 的欄位定義陣列（`class_attribute`），所以如果某個 exporter 本身也會單獨使用，就不要在它的子類別裡呼叫 `set`。
 
@@ -133,7 +134,7 @@ BUNDLE_GEMFILE=$PWD/gemfiles/ruby_3.4_rails_8.1.gemfile bundle install
 BUNDLE_GEMFILE=$PWD/gemfiles/ruby_3.4_rails_8.1.gemfile bundle exec rake test
 ```
 
-`bin/test_all` 會跑過所有支援的 Ruby 版本（需要 rbenv 或 rvm），`bin/check_dependencies` 會檢查相依套件的相容性；詳見 [TESTING.md](TESTING.md)（裡面列的版本可能落後於 CI）。
+`bin/test_all` 會跑過所有支援的 Ruby 版本（需要 rbenv 或 rvm），`bin/check_dependencies` 會檢查相依套件的相容性；詳見 [TESTING.md](TESTING.md)。
 
 ## 發版
 
