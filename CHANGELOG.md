@@ -13,6 +13,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Full `README.md`: overview, requirements, installation, DSL usage, development and release flow.
 - CLAUDE.md rule: every PR must also update `README.md` and `CHANGELOG.md`.
 
+## [1.3.0] - 2026-10-27
+
+### Fixed
+
+- `ExportTo::Base#each` raised `NoMethodError (undefined method 'rows!')` on every call. It now returns an Array of all rows (header row first, same content as `#to_csv`); with a block it yields each row and returns the exporter, so Enumerable methods (`map`, `to_a`, ...) work too. `#each!` is unchanged.
+- `TESTING.md` and `bin/test_all` were stale (Ruby 2.7–3.1 only). They now describe and run the same matrix as `.github/workflows/ci.yml`.
+
+### Deprecated
+
+- `ExportTo::Base#to_xls`: it has returned **XLSX** data (same as `#to_xlsx`) since 1.0.0, not a legacy `.xls` file. The return value is unchanged to avoid breaking callers, but it now prints a one-time `[DEPRECATION]` warning (to `$stderr`, once per process). Use `#to_xlsx`; for a real `.xls` use `ExportTo::Exporter::Xls.new(export).to_xls`. A future major version may make `#to_xls` return a real `.xls` file or remove it.
+
+### Added
+
+- Tests: `#each`, `#to_xls` compatibility (still XLSX) and its deprecation warning, `#to_xlsx` / `ExportTo::Exporter::Xls` output formats.
+
 ## [1.2.1] - 2026-10-27
 
 ### Added
@@ -82,7 +97,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Initial release: `ExportTo::Base` DSL (`set`, `joins`, `presenter`, `each_with`), presenters with row counters, empty join relations, `to_xlsx`.
 
-[Unreleased]: https://github.com/superlanding/export_to/compare/v1.2.1...HEAD
+[Unreleased]: https://github.com/superlanding/export_to/compare/v1.3.0...HEAD
+[1.3.0]: https://github.com/superlanding/export_to/compare/v1.2.1...v1.3.0
 [1.2.1]: https://github.com/superlanding/export_to/compare/v1.2.0...v1.2.1
 [1.2.0]: https://github.com/superlanding/export_to/compare/v1.1.2...v1.2.0
 [1.1.2]: https://github.com/superlanding/export_to/compare/v1.1.1...v1.1.2

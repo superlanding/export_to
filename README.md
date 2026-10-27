@@ -3,9 +3,9 @@
 [![Gem Version](https://badge.fury.io/rb/export_to.svg)](https://rubygems.org/gems/export_to)
 [![CI](https://github.com/superlanding/export_to/actions/workflows/ci.yml/badge.svg)](https://github.com/superlanding/export_to/actions/workflows/ci.yml)
 
-Export a collection of records (ActiveRecord relations, arrays of Structs, anything that responds to `each`) to **CSV**, **XLSX** or **XLS** with a small declarative DSL.
+Export a collection of records (ActiveRecord relations, arrays of Structs, anything that responds to `each`) to **CSV** or **XLSX** (and, through a lower-level exporter, legacy **XLS**) with a small declarative DSL.
 
-You describe the columns once (title, source attribute, width, format, value transform) in an `ExportTo::Base` subclass, optionally add a presenter for computed columns and a `joins` relation that expands one record into several rows, then call `to_csv` / `to_xlsx` / `to_xls`.
+You describe the columns once (title, source attribute, width, format, value transform) in an `ExportTo::Base` subclass, optionally add a presenter for computed columns and a `joins` relation that expands one record into several rows, then call `to_csv` / `to_xlsx`.
 
 ## Requirements
 
@@ -87,6 +87,8 @@ export = UserExport.new(users)
 
 export.to_csv    # => String, every field quoted ("Name","Mobile",...)
 export.to_xlsx   # => binary String of an .xlsx file
+export.each      # => Array of rows, the header row first: [["Name", "Mobile", ...], ["Eddie Li", ...], ...]
+export.each { |columns| ... }   # yields each row (header first) and returns the exporter; Enumerable methods work
 ```
 
 Example CSV output for two users (the second has two wallets):
@@ -112,8 +114,7 @@ end
 
 These describe the current behavior of the code:
 
-- `ExportTo::Base#to_xls` currently delegates to the **XLSX** exporter, so it returns xlsx data. For a real legacy `.xls` file use `ExportTo::Exporter::Xls.new(export).to_xls`.
-- `ExportTo::Base#each` calls an undefined `rows!` and raises `NoMethodError`. Iterate with `each!` (yields `columns, record, index`, with the header row first) or use one of the `to_*` methods.
+- `ExportTo::Base#to_xls` is **deprecated and misnamed**: since 1.0.0 it returns the same **XLSX** data as `#to_xlsx` (not a legacy `.xls` file). This is kept so existing callers do not break; it prints a one-time `[DEPRECATION]` warning. Use `#to_xlsx`. For a real legacy `.xls` file use `ExportTo::Exporter::Xls.new(export).to_xls` (no styling options are applied).
 - `width:` / `format:` and `excel` options only affect XLSX output.
 - Subclasses share the column definitions arrays of their parent class (`class_attribute`), so do not call `set` on a subclass of an exporter that is used on its own.
 
@@ -133,7 +134,7 @@ BUNDLE_GEMFILE=$PWD/gemfiles/ruby_3.4_rails_8.1.gemfile bundle install
 BUNDLE_GEMFILE=$PWD/gemfiles/ruby_3.4_rails_8.1.gemfile bundle exec rake test
 ```
 
-`bin/test_all` runs every supported Ruby (needs rbenv or rvm) and `bin/check_dependencies` checks dependency compatibility; see [TESTING.md](TESTING.md) for details (its version lists can lag behind CI).
+`bin/test_all` runs every supported Ruby (needs rbenv or rvm) and `bin/check_dependencies` checks dependency compatibility; see [TESTING.md](TESTING.md) for details.
 
 ## Releasing
 
