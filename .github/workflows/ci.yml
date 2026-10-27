@@ -31,6 +31,14 @@ jobs:
             rails: '7.1'
           - ruby: '3.3'
             rails: '7.1'
+          - ruby: '3.3'
+            rails: '8.0'
+          - ruby: '3.3'
+            rails: '8.1'
+          - ruby: '3.4'
+            rails: '8.0'
+          - ruby: '3.4'
+            rails: '8.1'
 
     env:
       BUNDLE_GEMFILE: ${{ github.workspace }}/gemfiles/ruby_${{ matrix.ruby }}_rails_${{ matrix.rails }}.gemfile
