@@ -1,86 +1,89 @@
-# Changelog
+# 更新紀錄（Changelog）
 
-All notable changes to this project are documented in this file.
+本檔記錄此專案所有值得注意的變更。
 
-The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
-and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+格式參考 [Keep a Changelog](https://keepachangelog.com/zh-TW/1.1.0/)，版本號遵循 [Semantic Versioning](https://semver.org/lang/zh-TW/)。
 
 ## [Unreleased]
 
 ### Added
 
-- `CHANGELOG.md`.
-- Full `README.md`: overview, requirements, installation, DSL usage, development and release flow.
-- CLAUDE.md rule: every PR must also update `README.md` and `CHANGELOG.md`.
+- 新增 `CHANGELOG.md`。
+- 完整的 `README.md`：概述、環境需求、安裝、DSL 用法、開發與發版流程。
+- CLAUDE.md 規則：每個 PR 都必須同步更新 `README.md` 與 `CHANGELOG.md`；`README.md` 與 `CHANGELOG.md` 一律用繁體中文撰寫。
+
+### Changed
+
+- `README.md`、`CHANGELOG.md` 改以繁體中文（zh-TW）撰寫。
 
 ## [1.2.1] - 2026-10-27
 
 ### Added
 
-- Support for Rails 8.0 / 8.1 and Ruby 3.4 (`activesupport` is now allowed up to `< 8.2`; the `csv` gem is an explicit dependency; the `required_ruby_version` upper bound is removed; new `ruby_3.3_rails_8.*` / `ruby_3.4_rails_8.*` gemfiles and CI jobs).
-- GitHub Actions `publish.yml`: a new version on `master` is published to RubyGems through Trusted Publishing.
-- CLAUDE.md release rules.
+- 支援 Rails 8.0 / 8.1 與 Ruby 3.4（`activesupport` 現在放寬到 `< 8.2`；`csv` gem 改為明確相依；移除 `required_ruby_version` 的上限；新增 `ruby_3.3_rails_8.*` / `ruby_3.4_rails_8.*` gemfile 與對應的 CI job）。
+- GitHub Actions `publish.yml`：新版本進到 `master` 時，透過 Trusted Publishing 自動發佈到 RubyGems。
+- CLAUDE.md 加入發版規則。
 
 ### Changed
 
-- Removed stale per-gemfile lockfiles that broke older Rubies in CI.
+- 移除每個 gemfile 各自的舊 lockfile，這些 lockfile 會讓 CI 在較舊的 Ruby 上失敗。
 
 ## [1.2.0] - 2026-01-08
 
 ### Added
 
-- Ruby 3.2 and 3.3 test gemfiles (`ruby_3.2_rails_7.0`, `ruby_3.2_rails_7.1`, `ruby_3.3_rails_7.1`) and CI jobs.
+- 新增 Ruby 3.2 與 3.3 的測試 gemfile（`ruby_3.2_rails_7.0`、`ruby_3.2_rails_7.1`、`ruby_3.3_rails_7.1`）與 CI job。
 
 ### Changed
 
-- Gemspec `required_ruby_version` upper bound raised from `< 3.2.0` to `< 3.4.0`.
+- gemspec 的 `required_ruby_version` 上限由 `< 3.2.0` 提高到 `< 3.4.0`。
 
 ## [1.1.2] - 2026-01-07
 
 ### Changed
 
-- Updated gemfile lockfiles.
+- 更新各 gemfile 的 lockfile。
 
 ## [1.1.1] - 2026-01-07
 
 ### Added
 
-- Multi-version Ruby / Rails test setup: per-version gemfiles, GitHub Actions matrix, `bin/test_all`, `bin/check_dependencies` and `TESTING.md`.
+- 多版本 Ruby / Rails 測試環境：每個版本各自的 gemfile、GitHub Actions 矩陣、`bin/test_all`、`bin/check_dependencies` 與 `TESTING.md`。
 
 ### Fixed
 
-- A test no longer depends on a hard-coded macOS path.
+- 測試不再依賴寫死的 macOS 路徑。
 
 ## [1.1.0] - 2023-02-02
 
 ### Changed
 
-- XLSX exporter fixes and tweaks (`ExportTo::Exporter::Xlsx`).
+- 修正並微調 XLSX exporter（`ExportTo::Exporter::Xlsx`）。
 
 ## [1.0.0] - 2023-02-02
 
 ### Changed
 
-- Rewrite of the internals: export logic moved into `ExportTo::Exporter::Csv` / `Xls` / `Xlsx`; `ExportTo::Base` exposes `to_csv`, `to_xlsx` and `to_xls`.
-- `activesupport` is now constrained to `>= 6, < 7`; development dependencies relaxed to `bundler >= 2.0`, `rake >= 13`.
+- 內部改寫：匯出邏輯移到 `ExportTo::Exporter::Csv` / `Xls` / `Xlsx`；`ExportTo::Base` 提供 `to_csv`、`to_xlsx` 與 `to_xls`。
+- `activesupport` 限制為 `>= 6, < 7`；開發相依套件放寬為 `bundler >= 2.0`、`rake >= 13`。
 
 ## [0.1.2] - 2019-06-19
 
 ### Changed
 
-- CSV output now force-quotes every field.
+- CSV 輸出現在會強制幫每個欄位加上引號。
 
 ## [0.1.1] - 2018-12-05
 
 ### Fixed
 
-- "File exists" bug when exporting.
+- 修正匯出時出現 "File exists" 的 bug。
 
 ## [0.1.0] - 2018-10-21
 
 ### Added
 
-- Initial release: `ExportTo::Base` DSL (`set`, `joins`, `presenter`, `each_with`), presenters with row counters, empty join relations, `to_xlsx`.
+- 首次發佈：`ExportTo::Base` DSL（`set`、`joins`、`presenter`、`each_with`）、帶有列計數器的 presenter、空的 join relation 處理，以及 `to_xlsx`。
 
 [Unreleased]: https://github.com/superlanding/export_to/compare/v1.2.1...HEAD
 [1.2.1]: https://github.com/superlanding/export_to/compare/v1.2.0...v1.2.1

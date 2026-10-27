@@ -3,13 +3,13 @@
 [![Gem Version](https://badge.fury.io/rb/export_to.svg)](https://rubygems.org/gems/export_to)
 [![CI](https://github.com/superlanding/export_to/actions/workflows/ci.yml/badge.svg)](https://github.com/superlanding/export_to/actions/workflows/ci.yml)
 
-Export a collection of records (ActiveRecord relations, arrays of Structs, anything that responds to `each`) to **CSV**, **XLSX** or **XLS** with a small declarative DSL.
+用一套簡單的宣告式 DSL，把一批資料（ActiveRecord relation、Struct 陣列，或任何有 `each` 的物件）匯出成 **CSV**、**XLSX** 或 **XLS**。
 
-You describe the columns once (title, source attribute, width, format, value transform) in an `ExportTo::Base` subclass, optionally add a presenter for computed columns and a `joins` relation that expands one record into several rows, then call `to_csv` / `to_xlsx` / `to_xls`.
+你只要在 `ExportTo::Base` 的子類別裡宣告一次欄位（標題、來源屬性、寬度、格式、值的轉換），需要計算欄位時可以加上 presenter，也可以加上 `joins` relation 把一筆資料展開成多列，最後呼叫 `to_csv` / `to_xlsx` / `to_xls` 即可。
 
-## Requirements
+## 環境需求
 
-| Ruby | Rails / ActiveSupport tested in CI |
+| Ruby | CI 測試的 Rails / ActiveSupport 版本 |
 |------|------------------------------------|
 | 2.7  | 6.1 |
 | 3.0  | 6.1, 7.0 |
@@ -18,45 +18,45 @@ You describe the columns once (title, source attribute, width, format, value tra
 | 3.3  | 7.1, 8.0, 8.1 |
 | 3.4  | 8.0, 8.1 |
 
-The gemspec requires Ruby `>= 2.7.0` and `activesupport >= 6.0, < 8.2`. The source of truth is [`.github/workflows/ci.yml`](.github/workflows/ci.yml).
+gemspec 要求 Ruby `>= 2.7.0` 與 `activesupport >= 6.0, < 8.2`。實際支援範圍以 [`.github/workflows/ci.yml`](.github/workflows/ci.yml) 為準。
 
-Runtime dependencies: `fast_excel` (XLSX), `spreadsheet` (XLS), `csv`, `iconv`, `activesupport`.
+Runtime 相依套件：`fast_excel`（XLSX）、`spreadsheet`（XLS）、`csv`、`iconv`、`activesupport`。
 
-## Installation
+## 安裝
 
-Add this line to your application's Gemfile:
+在應用程式的 Gemfile 加入這一行：
 
 ```ruby
 gem "export_to"
 ```
 
-And then execute:
+然後執行：
 
 ```bash
 bundle install
 ```
 
-Or install it yourself with `gem install export_to`.
+或自行執行 `gem install export_to` 安裝。
 
-## Usage
+## 使用方式
 
-### 1. Define an exporter
+### 1. 定義 exporter
 
 ```ruby
 class UserExport < ExportTo::Base
-  # set <header title>, <key>, <column options>, &optional_transform
+  # set <標題>, <key>, <欄位選項>, &可選的轉換 block
   set "Name",   :full_name, width: 30
   set "Mobile", :mobile,    width: 20, format: { bold: true }
   set "Amount", :amount,    width: 12 do |value|
-    value + 100                    # the block receives the cell value and returns the final one
+    value + 100                    # block 會收到儲存格的值，並回傳最終要輸出的值
   end
-  set "Source", "web"              # a String key is written as a fixed value in every row
+  set "Source", "web"              # key 為 String 時，每一列都會寫入這個固定值
 
-  excel worksheet: "Users", height: 24   # optional XLSX settings (worksheet name, row height)
+  excel worksheet: "Users", height: 24   # 可選的 XLSX 設定（工作表名稱、列高）
 
-  presenter do                     # optional: computed columns
+  presenter do                     # 可選：計算欄位
     def full_name
-      "#{first_name} #{last_name}" # unknown methods are delegated to the record
+      "#{first_name} #{last_name}" # 找不到的方法會委派給該筆 record
     end
 
     def amount
@@ -64,32 +64,32 @@ class UserExport < ExportTo::Base
     end
   end
 
-  joins :wallets                   # optional: one row per record in record.wallets
+  joins :wallets                   # 可選：record.wallets 裡每一筆各佔一列
 end
 ```
 
-- **`set(title, key, options = {}, &block)`**: one column per call, in order.
-  - `key` as a **Symbol** is read from the presenter (which delegates to the record); `nil` becomes `""`.
-  - `key` as a **String** is used literally.
-  - XLSX `options`: `width:` (column width) and `format:` (a `FastExcel` format hash, e.g. `{ bold: true }`).
-  - The optional block post-processes the cell value.
-- **`excel(worksheet: "Name", height: 20)`**: worksheet name (default `"Default"`) and data row height (default `20`). The header row is bold, centered and has a background color.
-- **`presenter { ... }`**: defines `YourExport::Presenter` (a subclass of the parent exporter's presenter). Inside it you can use `model`, `relation`, `relation?`, `x` (record index) and `y` (index inside the `joins` relation).
-- **`joins(:relation_name)`**: when `record.relation_name` is present, every element becomes its own row and `relation` is that element; the presenter first looks for a method on `relation`, then on `model`. Records with an empty relation produce a single row (`relation?` is `false`).
-- **`each_with { |presenter| ... }`**: a hook called with each row's presenter before the columns are read.
-- **`self.each_method = :find_in_batches`**: iterate with `records.find_in_batches` instead of `records.each`, for large ActiveRecord relations.
+- **`set(title, key, options = {}, &block)`**：每次呼叫新增一個欄位，依呼叫順序排列。
+  - `key` 為 **Symbol** 時，會從 presenter 讀取（presenter 會委派給 record）；`nil` 會變成 `""`。
+  - `key` 為 **String** 時，直接當作固定內容使用。
+  - XLSX 專用的 `options`：`width:`（欄寬）與 `format:`（`FastExcel` 的 format hash，例如 `{ bold: true }`）。
+  - 可選的 block 用來後處理儲存格的值。
+- **`excel(worksheet: "Name", height: 20)`**：工作表名稱（預設 `"Default"`）與資料列的列高（預設 `20`）。標題列為粗體、置中並帶有背景色。
+- **`presenter { ... }`**：定義 `YourExport::Presenter`（是上層 exporter 的 presenter 的子類別）。在裡面可以使用 `model`、`relation`、`relation?`、`x`（record 的索引）與 `y`（`joins` relation 內的索引）。
+- **`joins(:relation_name)`**：當 `record.relation_name` 有資料時，每個元素各自成為一列，且 `relation` 就是該元素；presenter 會先找 `relation` 上的方法，找不到再找 `model`。relation 為空的 record 會產生單獨一列（此時 `relation?` 為 `false`）。
+- **`each_with { |presenter| ... }`**：hook，會在讀取各欄位之前，以每一列的 presenter 呼叫一次。
+- **`self.each_method = :find_in_batches`**：改用 `records.find_in_batches` 而不是 `records.each` 來迭代，適合很大的 ActiveRecord relation。
 
-### 2. Export
+### 2. 匯出
 
 ```ruby
-users  = User.includes(:wallets).where(active: true)   # or any enumerable
+users  = User.includes(:wallets).where(active: true)   # 或任何可列舉的物件
 export = UserExport.new(users)
 
-export.to_csv    # => String, every field quoted ("Name","Mobile",...)
-export.to_xlsx   # => binary String of an .xlsx file
+export.to_csv    # => String，每個欄位都有加引號（"Name","Mobile",...）
+export.to_xlsx   # => .xlsx 檔案的二進位 String
 ```
 
-Example CSV output for two users (the second has two wallets):
+兩位使用者的 CSV 輸出範例（第二位有兩個 wallet）：
 
 ```
 "Name","Mobile","Amount","Source"
@@ -98,7 +98,7 @@ Example CSV output for two users (the second has two wallets):
 "Vegeta Lu","+8868","2100","web"
 ```
 
-Serving it from a Rails controller:
+在 Rails controller 裡提供下載：
 
 ```ruby
 def export
@@ -108,48 +108,48 @@ def export
 end
 ```
 
-### Known limitations
+### 已知限制
 
-These describe the current behavior of the code:
+以下是目前程式碼的實際行為：
 
-- `ExportTo::Base#to_xls` currently delegates to the **XLSX** exporter, so it returns xlsx data. For a real legacy `.xls` file use `ExportTo::Exporter::Xls.new(export).to_xls`.
-- `ExportTo::Base#each` calls an undefined `rows!` and raises `NoMethodError`. Iterate with `each!` (yields `columns, record, index`, with the header row first) or use one of the `to_*` methods.
-- `width:` / `format:` and `excel` options only affect XLSX output.
-- Subclasses share the column definitions arrays of their parent class (`class_attribute`), so do not call `set` on a subclass of an exporter that is used on its own.
+- `ExportTo::Base#to_xls` 目前會委派給 **XLSX** exporter，所以回傳的是 xlsx 資料。若需要真正的舊版 `.xls` 檔，請用 `ExportTo::Exporter::Xls.new(export).to_xls`。
+- `ExportTo::Base#each` 會呼叫未定義的 `rows!`，並 raise `NoMethodError`。請改用 `each!`（會 yield `columns, record, index`，且第一筆是標題列），或使用 `to_*` 系列方法。
+- `width:` / `format:` 與 `excel` 選項只對 XLSX 輸出有效。
+- 子類別會共用上層 class 的欄位定義陣列（`class_attribute`），所以如果某個 exporter 本身也會單獨使用，就不要在它的子類別裡呼叫 `set`。
 
-## Development
+## 開發
 
-After checking out the repo, run `bin/setup` to install dependencies. Then run the tests:
+clone 下來之後，先執行 `bin/setup` 安裝相依套件，接著跑測試：
 
 ```bash
-bundle exec rake test        # also: rake t / rake (default)
-bin/console                  # interactive prompt
+bundle exec rake test        # 也可以用 rake t / rake（預設 task）
+bin/console                  # 互動式 console
 ```
 
-Each Ruby / Rails combination has its own gemfile in `gemfiles/` (CI sets `BUNDLE_GEMFILE` to it):
+每個 Ruby / Rails 組合在 `gemfiles/` 內都有各自的 gemfile（CI 會把 `BUNDLE_GEMFILE` 指到它）：
 
 ```bash
 BUNDLE_GEMFILE=$PWD/gemfiles/ruby_3.4_rails_8.1.gemfile bundle install
 BUNDLE_GEMFILE=$PWD/gemfiles/ruby_3.4_rails_8.1.gemfile bundle exec rake test
 ```
 
-`bin/test_all` runs every supported Ruby (needs rbenv or rvm) and `bin/check_dependencies` checks dependency compatibility; see [TESTING.md](TESTING.md) for details (its version lists can lag behind CI).
+`bin/test_all` 會跑過所有支援的 Ruby 版本（需要 rbenv 或 rvm），`bin/check_dependencies` 會檢查相依套件的相容性；詳見 [TESTING.md](TESTING.md)（裡面列的版本可能落後於 CI）。
 
-## Releasing
+## 發版
 
-Releases are automated with RubyGems [Trusted Publishing](https://guides.rubygems.org/trusted-publishing/) (no API key is stored in the repo):
+發版透過 RubyGems [Trusted Publishing](https://guides.rubygems.org/trusted-publishing/) 自動完成（repo 內不存放任何 API key）：
 
-1. In your PR, bump `ExportTo::VERSION` in `lib/export_to/version.rb` ([Semantic Versioning](https://semver.org/): patch for fixes, minor for compatible features, major for breaking changes).
-2. Add a matching `## [x.y.z] - YYYY-MM-DD` section to `CHANGELOG.md`.
-3. A human reviews and merges the PR into `master` (AI accounts can only open PRs).
-4. [`.github/workflows/publish.yml`](.github/workflows/publish.yml) runs on `master`: if the gemspec version is not on rubygems.org yet it runs `rake release` (builds the gem, tags `vX.Y.Z`, publishes). A merge without a version bump publishes nothing.
+1. 在你的 PR 裡修改 `lib/export_to/version.rb` 的 `ExportTo::VERSION`（遵循 [Semantic Versioning](https://semver.org/lang/zh-TW/)：修 bug 跳 patch、相容的新功能跳 minor、不相容的變更跳 major）。
+2. 在 `CHANGELOG.md` 新增對應的 `## [x.y.z] - YYYY-MM-DD` 區塊。
+3. 由真人 review 後合併進 `master`（AI 帳號只能開 PR）。
+4. [`.github/workflows/publish.yml`](.github/workflows/publish.yml) 會在 `master` 上執行：如果 gemspec 的版本還沒上 rubygems.org，就執行 `rake release`（打包 gem、打 `vX.Y.Z` tag、發佈）。沒有跳版號的合併不會發佈任何東西。
 
-Docs/CI-only PRs do not need a version bump. See [CLAUDE.md](CLAUDE.md): every PR must also update `README.md` (when behavior or usage changes) and add an entry to `CHANGELOG.md`.
+只改文件 / CI 的 PR 不需要跳版號。請見 [CLAUDE.md](CLAUDE.md)：每個 PR 也都必須更新 `README.md`（行為或用法有變時）並在 `CHANGELOG.md` 新增一筆條目。
 
-## Contributing
+## 貢獻
 
-Bug reports and pull requests are welcome on GitHub at https://github.com/superlanding/export_to.
+歡迎到 GitHub 回報問題與提交 pull request：https://github.com/superlanding/export_to。
 
-## License
+## 授權
 
-The gem is available as open source under the terms of the [MIT License](https://opensource.org/licenses/MIT).
+本 gem 以 [MIT License](https://opensource.org/licenses/MIT) 條款開源。
